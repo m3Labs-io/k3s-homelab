@@ -36,8 +36,6 @@ spec:
           links:
             - name: Discord
               url: "https://discord.com"
-            - name: Gmail
-              url: "https://gmail.com"
             - name: Slack
               url: "https://slack.com/signin"
         - name: Cloud
