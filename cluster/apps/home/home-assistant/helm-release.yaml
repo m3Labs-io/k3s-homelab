@@ -3,9 +3,9 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: home-assistant
-  namespace: default
+  namespace: home
 spec:
-  interval: 5m
+  interval: 15m
   chart:
     spec:
       chart: home-assistant
@@ -14,37 +14,35 @@ spec:
         kind: HelmRepository
         name: k8s-at-home-charts
         namespace: flux-system
-      interval: 5m
+  # See https://github.com/k8s-at-home/charts/blob/master/charts/home-assistant/values.yaml
   values:
     image:
-      repository: homeassistant/home-assistant
-      tag: 2021.12.7
+      repository: ghcr.io/home-assistant/home-assistant
+      tag: 2021.12.10
     env:
-      TZ: "${TIMEZONE}"
+      TZ: "America/Halifax"
     hostNetwork: true
-    service:
-      main:
-        ports:
-          http:
-            port: 8123
     ingress:
       main:
         enabled: true
         ingressClassName: "traefik"
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
+          external-dns/is-public: "true"
           hajimari.io/enable: "true"
           hajimari.io/icon: "home-assistant"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        labels:
+          app.kubernetes.io/part-of: home-assistant
         hosts:
-          - host: "hass.${SECRET_DOMAIN}"
+          - host: hass.${SECRET_DOMAIN}
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "hass.${SECRET_DOMAIN}"
-            secretName: "hass-tls"
+              - hass.${SECRET_DOMAIN}
+            secretName: tls.homeassistant
     probes:
       liveness:
         enabled: false
@@ -55,19 +53,18 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: hass-config
-    podAnnotations:
-      secret.reloader.stakater.com/reload: "home-assistant"
+        existingClaim: hass-pvc
     addons:
       codeserver:
-        enabled: false
+        enabled: true
         image:
           repository: ghcr.io/k8s-at-home/code-server
           tag: v4.0.1
         env:
-          TZ: "${TIMEZONE}"
-        git:
-          deployKeySecret: code-server
+          TZ: "America/Halifax"
+        #
+        #git:
+        #  deployKeySecret: code-server
         workingDir: "/config"
         args:
           - --auth
@@ -78,16 +75,21 @@ spec:
           - "/config/.vscode"
         ingress:
           enabled: true
-          ingressClassName: "traefik"
+          ingressClassName: traefik
+          annotations:
+            hajimari.io/enable: "true"
+            hajimari.io/icon: "pencil"
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          labels:
+            app.kubernetes.io/part-of: home-assistant
           hosts:
-            - host: "hass-config.${SECRET_DOMAIN}"
+            - host: hass-config.${SECRET_DOMAIN}
               paths:
                 - path: /
                   pathType: Prefix
           tls:
             - hosts:
-                - "hass-config.${SECRET_DOMAIN}"
-              secretname: "hass-tls"
+                - hass-config.${SECRET_DOMAIN}
         volumeMounts:
           - name: config
             mountPath: /config
