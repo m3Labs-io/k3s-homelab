@@ -23,11 +23,10 @@ spec:
       TZ: "${TIMEZONE}"
     hostNetwork: true
     service:
-      enabled: true
-      type: LoadBalancer
-      spec:
-        loadBalancerIP: "${METALLB_TRAEFIK_ADDR}"
-        externalTrafficPolicy: Local
+      main:
+        ports:
+          http:
+            port: 8123
     ingress:
       main:
         enabled: true
