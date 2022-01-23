@@ -17,11 +17,17 @@ spec:
       interval: 5m
   values:
     image:
-      repository: ghcr.io/home-assistant/home-assistant
-      tag: 2021.12.10
+      repository: homeassistant/home-assistant
+      tag: 2021.12.7
     env:
       TZ: "${TIMEZONE}"
     hostNetwork: true
+    service:
+      enabled: true
+      type: LoadBalancer
+      spec:
+        loadBalancerIP: "${METALLB_TRAEFIK_ADDR}"
+        externalTrafficPolicy: Local
     ingress:
       main:
         enabled: true
