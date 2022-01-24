@@ -20,9 +20,6 @@ spec:
       tag: v2.0.14
     auth:
       enabled: true
-    controller:
-      labels:
-        app.kubernetes.io/part-of: mosquitto
     env:
       TZ: "America/Halifax"
     service:
@@ -30,7 +27,7 @@ spec:
         type: LoadBalancer
         annotations:
           external-dns.alpha.kubernetes.io/hostname: "mqtt.${SECRET_DOMAIN}"
-        loadBalancerIP: "${LB_MOSQUITTO}"
+        externalIPs: "${SVC_MOSQUITTO_ADDR}"
         externalTrafficPolicy: Local
     persistence:
       data:
@@ -38,7 +35,10 @@ spec:
         existingClaim: mqtt-data
       configinc:
         enabled: true
-        existingClaim: mqtt-config
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: mosquitto
     resources:
       requests:
         memory: 32Mi
