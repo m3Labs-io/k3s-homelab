@@ -27,19 +27,18 @@ spec:
         type: LoadBalancer
         annotations:
           external-dns.alpha.kubernetes.io/hostname: "mqtt.${SECRET_DOMAIN}"
-        externalIPs:
-          - "${SVC_MOSQUITTO_ADDR}"
+        loadBalancerIP: "${SVC_MOSQUITTO_ADDR}"
         externalTrafficPolicy: Local
     persistence:
       data:
         enabled: true
-        existingClaim: mqtt-data
+        existingClaim: mosquitto-data
       configinc:
         enabled: true
         type: custom
         volumeSpec:
           secret:
-            secretName: mosquitto
+            secretName: mosquitto-config
     resources:
       requests:
         memory: 32Mi
