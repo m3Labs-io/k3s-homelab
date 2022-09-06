@@ -3284,13 +3284,6 @@ spec:
                 - default
                 - oci
                 type: string
-              type:
-                description: Type of the HelmRepository. When this field is set to  "oci",
-                  the URL field value must be prefixed with "oci://".
-                enum:
-                - default
-                - oci
-                type: string
               url:
                 description: URL of the Helm repository, a valid URL contains at least
                   a protocol and host.
